@@ -12,7 +12,7 @@ import (
 	"github.com/seantesterman/chirpy/internal/database"
 )
 
-// goose postgres postgres://postgres:postgres@localhost:5432/chirpy up
+// goose postgres postgres://postgres:postgres@localhost:5432/chirpy down
 
 type apiConfig struct {
 	fileserverHits atomic.Int32
@@ -51,7 +51,7 @@ func main() {
 	mux.Handle("/app/", http.StripPrefix("/app", apiCfg.middlewareMetricsInc(http.FileServer(http.Dir(filepathRoot)))))
 	mux.HandleFunc("GET /api/healthz", handlerReadiness)
 	mux.HandleFunc("POST /api/users", apiCfg.handlerUsersCreate)
-	mux.HandleFunc("/api/validate_chirp", handlerChirpsValidate)
+	mux.HandleFunc("POST /api/chirps", apiCfg.handlerChirpsCreate)
 	mux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
 	mux.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
 

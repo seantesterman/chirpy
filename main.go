@@ -7,6 +7,7 @@ import (
 	"os"
 	"sync/atomic"
 
+	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 	_ "github.com/lib/pq"
 	"github.com/seantesterman/chirpy/internal/database"
@@ -47,18 +48,21 @@ func main() {
 		platform:       platform,
 	}
 
-	mux := http.NewServeMux()
-	mux.Handle("/app/", http.StripPrefix("/app", apiCfg.middlewareMetricsInc(http.FileServer(http.Dir(filepathRoot)))))
-	mux.HandleFunc("GET /api/healthz", handlerReadiness)
-	mux.HandleFunc("POST /api/users", apiCfg.handlerUsersCreate)
-	mux.HandleFunc("POST /api/chirps", apiCfg.handlerChirpsCreate)
-	mux.HandleFunc("GET /api/chirps", apiCfg.handlerChirpsGet)
-	mux.HandleFunc("GET /admin/metrics", apiCfg.handlerMetrics)
-	mux.HandleFunc("POST /admin/reset", apiCfg.handlerReset)
+	r := mux.NewRouter()
+	r.Handle("/app/", http.StripPrefix("/app", apiCfg.middlewareMetricsInc(http.FileServer(http.Dir(filepathRoot)))))
+	r.HandleFunc("/api/healthz", handlerReadiness).Methods("GET")
+	r.HandleFunc("/api/users", apiCfg.handlerUsersCreate).Methods("POST")
+	r.HandleFunc("/api/chirps", apiCfg.handlerChirpsCreate).Methods("POST")
+	r.HandleFunc("/api/chirps", apiCfg.handlerChirpsGet).Methods("GET")
+	r.HandleFunc("/admin/metrics", apiCfg.handlerMetrics).Methods("GET")
+	r.HandleFunc("/admin/reset", apiCfg.handlerReset).Methods("POST")
+	r.HandleFunc("/api/chirps/{chirpID}", apiCfg.handlerChirpsID).Methods("GET")
+
+	http.Handle("/", r)
 
 	srv := &http.Server{
 		Addr:    ":" + port,
-		Handler: mux,
+		Handler: r,
 	}
 	log.Printf("Serving files from %s on port: %s\n", filepathRoot, port)
 	log.Fatal(srv.ListenAndServe())

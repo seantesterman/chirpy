@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"github.com/seantesterman/chirpy/internal/database"
 )
 
@@ -106,4 +107,26 @@ func (cfg *apiConfig) handlerChirpsGet(w http.ResponseWriter, r *http.Request) {
 
 	respondWithJSON(w, http.StatusOK, listOfChirps)
 
+}
+
+func (cfg *apiConfig) handlerChirpsID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	chirpID, err := uuid.Parse(vars["chirpID"])
+	if err != nil {
+		respondWithError(w, http.StatusBadRequest, "Invalid Chirp ID", err)
+	}
+	chirp, err := cfg.db.GetChirp(r.Context(), chirpID)
+
+	if err != nil {
+		respondWithError(w, http.StatusNotFound, "Chirp not found", err)
+		return
+	}
+
+	respondWithJSON(w, http.StatusOK, Chirp{
+		ID:        chirp.ID,
+		CreatedAt: chirp.CreatedAt,
+		UpdatedAt: chirp.UpdatedAt,
+		Body:      chirp.Body,
+		UserID:    chirp.UserID,
+	})
 }

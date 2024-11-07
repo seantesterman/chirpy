@@ -54,6 +54,7 @@ func main() {
 	r.HandleFunc("/api/users", apiCfg.handlerUsersCreate).Methods("POST")
 	r.HandleFunc("/api/chirps", apiCfg.handlerChirpsCreate).Methods("POST")
 	r.HandleFunc("/api/chirps", apiCfg.handlerChirpsGet).Methods("GET")
+	r.HandleFunc("/api/login", apiCfg.handlerLogin).Methods("POST")
 	r.HandleFunc("/admin/metrics", apiCfg.handlerMetrics).Methods("GET")
 	r.HandleFunc("/admin/reset", apiCfg.handlerReset).Methods("POST")
 	r.HandleFunc("/api/chirps/{chirpID}", apiCfg.handlerChirpsID).Methods("GET")

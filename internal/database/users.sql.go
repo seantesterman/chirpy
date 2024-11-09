@@ -40,6 +40,25 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 	return i, err
 }
 
+const getToken = `-- name: GetToken :one
+SELECT token, created_at, updated_at, user_id, expires_at, revoked_at FROM refresh_tokens
+WHERE token = $1 AND (expires_at > NOW()) AND (revoked_at IS NULL)
+`
+
+func (q *Queries) GetToken(ctx context.Context, token string) (RefreshToken, error) {
+	row := q.db.QueryRowContext(ctx, getToken, token)
+	var i RefreshToken
+	err := row.Scan(
+		&i.Token,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.UserID,
+		&i.ExpiresAt,
+		&i.RevokedAt,
+	)
+	return i, err
+}
+
 const getUserByEmail = `-- name: GetUserByEmail :one
 SELECT id, created_at, updated_at, email, hashed_password FROM users
 WHERE email = $1

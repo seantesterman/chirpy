@@ -13,8 +13,6 @@ import (
 	"github.com/seantesterman/chirpy/internal/database"
 )
 
-// goose postgres postgres://postgres:postgres@localhost:5432/chirpy down
-
 type apiConfig struct {
 	fileserverHits atomic.Int32
 	db             *database.Queries
@@ -62,6 +60,8 @@ func main() {
 	r.HandleFunc("/api/chirps", apiCfg.handlerChirpsCreate).Methods("POST")
 	r.HandleFunc("/api/chirps", apiCfg.handlerChirpsGet).Methods("GET")
 	r.HandleFunc("/api/login", apiCfg.handlerLogin).Methods("POST")
+	r.HandleFunc("/api/refresh", apiCfg.handlerRefreshToken).Methods("POST")
+	r.HandleFunc("/api/revoke", apiCfg.handlerRevokeToken).Methods("POST")
 	r.HandleFunc("/admin/metrics", apiCfg.handlerMetrics).Methods("GET")
 	r.HandleFunc("/admin/reset", apiCfg.handlerReset).Methods("POST")
 	r.HandleFunc("/api/chirps/{chirpID}", apiCfg.handlerChirpsID).Methods("GET")

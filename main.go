@@ -57,6 +57,7 @@ func main() {
 	r.Handle("/app/", http.StripPrefix("/app", apiCfg.middlewareMetricsInc(http.FileServer(http.Dir(filepathRoot)))))
 	r.HandleFunc("/api/healthz", handlerReadiness).Methods("GET")
 	r.HandleFunc("/api/users", apiCfg.handlerUsersCreate).Methods("POST")
+	r.HandleFunc("/api/users", apiCfg.handlerUsersUpdate).Methods("PUT")
 	r.HandleFunc("/api/chirps", apiCfg.handlerChirpsCreate).Methods("POST")
 	r.HandleFunc("/api/chirps", apiCfg.handlerChirpsGet).Methods("GET")
 	r.HandleFunc("/api/login", apiCfg.handlerLogin).Methods("POST")
@@ -72,6 +73,7 @@ func main() {
 		Addr:    ":" + port,
 		Handler: r,
 	}
+
 	log.Printf("Serving files from %s on port: %s\n", filepathRoot, port)
 	log.Fatal(srv.ListenAndServe())
 

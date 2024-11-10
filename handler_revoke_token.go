@@ -9,9 +9,6 @@ import (
 )
 
 func (cfg *apiConfig) handlerRevokeToken(w http.ResponseWriter, r *http.Request) {
-	type UserResponse struct {
-	}
-
 	bearerToken, err := auth.GetBearerToken(r.Header)
 	if err != nil {
 		respondWithError(w, http.StatusUnauthorized, "Token not found", err)

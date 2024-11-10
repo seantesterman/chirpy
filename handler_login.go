@@ -24,6 +24,7 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 		Email        string    `json:"email"`
 		Token        string    `json:"token"`
 		RefreshToken string    `json:"refresh_token"`
+		IsChirpyRed  bool      `json:"is_chirpy_red"`
 	}
 
 	decoder := json.NewDecoder(r.Body)
@@ -83,6 +84,7 @@ func (cfg *apiConfig) handlerLogin(w http.ResponseWriter, r *http.Request) {
 			Email:        user.Email,
 			Token:        token,
 			RefreshToken: refreshTokenString,
+			IsChirpyRed:  user.IsChirpyRed.Bool,
 		})
 	} else {
 		respondWithError(w, http.StatusUnauthorized, "Incorrect email or password", err)

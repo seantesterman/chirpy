@@ -99,15 +99,46 @@ func getCleanedBody(body string, badWords map[string]struct{}) string {
 }
 
 func (cfg *apiConfig) handlerChirpsGet(w http.ResponseWriter, r *http.Request) {
+	authorID := r.URL.Query().Get("author_id")
 
-	chirp, err := cfg.db.GetChirps(r.Context())
+	if authorID == "" {
+
+		chirps, err := cfg.db.GetChirps(r.Context())
+		if err != nil {
+			respondWithError(w, http.StatusInternalServerError, "Couldn't get chirps", err)
+			return
+		}
+
+		listOfChirps := []Chirp{}
+		for _, chi := range chirps {
+			convertedChirp := Chirp{
+				ID:        chi.ID,
+				CreatedAt: chi.CreatedAt,
+				UpdatedAt: chi.UpdatedAt,
+				Body:      chi.Body,
+				UserID:    chi.UserID,
+			}
+			listOfChirps = append(listOfChirps, convertedChirp)
+		}
+
+		respondWithJSON(w, http.StatusOK, listOfChirps)
+		return
+	}
+
+	parsedAuthorID, err := uuid.Parse(authorID)
+	if err != nil {
+		respondWithError(w, http.StatusInternalServerError, "Couldn't parse author ID", err)
+		return
+	}
+
+	chirps, err := cfg.db.GetChirpsByUser(r.Context(), parsedAuthorID)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't get chirps", err)
 		return
 	}
 
 	listOfChirps := []Chirp{}
-	for _, chi := range chirp {
+	for _, chi := range chirps {
 		convertedChirp := Chirp{
 			ID:        chi.ID,
 			CreatedAt: chi.CreatedAt,
@@ -119,6 +150,7 @@ func (cfg *apiConfig) handlerChirpsGet(w http.ResponseWriter, r *http.Request) {
 	}
 
 	respondWithJSON(w, http.StatusOK, listOfChirps)
+	return
 
 }
 

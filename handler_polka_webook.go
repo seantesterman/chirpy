@@ -5,6 +5,7 @@ import (
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/seantesterman/chirpy/internal/auth"
 )
 
 func (cfg *apiConfig) handlerPolkaWebhook(w http.ResponseWriter, r *http.Request) {
@@ -20,6 +21,17 @@ func (cfg *apiConfig) handlerPolkaWebhook(w http.ResponseWriter, r *http.Request
 	err := decoder.Decode(&userRequest)
 	if err != nil {
 		respondWithError(w, http.StatusInternalServerError, "Couldn't read request body", err)
+		return
+	}
+
+	apiKey, err := auth.GetAPIKey(r.Header)
+	if err != nil {
+		respondWithError(w, http.StatusUnauthorized, "Could not read API Key", err)
+		return
+	}
+
+	if apiKey != cfg.polkaKey {
+		respondWithError(w, http.StatusUnauthorized, "API Keys do not match", err)
 		return
 	}
 
